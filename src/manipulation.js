@@ -422,7 +422,7 @@ jQuery.fn.extend( {
 						// Remove element nodes and prevent memory leaks
 						if ( elem.nodeType === 1 ) {
 							jQuery.cleanData( getAll( elem, false ) );
-							elem.innerHTML = value;
+							elem.appendChild( value );
 						}
 					}
 

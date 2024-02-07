@@ -1362,11 +1362,22 @@ jQuery.support = ( function() {
 	var support, all, a,
 		input, select, fragment,
 		opt, eventName, isSupported, i,
-		div = document.createElement( "div" );
+		div = document.createElement( "div" ),
+		linkElement = document.createElement( "link" ),
+		tableElement = document.createElement( "table" ),
+		anchorElement = document.createElement( "anchor" ),
+		inputElement = document.createElement( "input" );
 
 	// Setup
 	div.setAttribute( "className", "t" );
-	div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>";
+	anchorElement.href = "/a";
+	anchorElement.textContent = "a";
+	inputElement.type = "checkbox";
+
+	div.appendChild( linkElement );
+	div.appendChild( tableElement );
+	div.appendChild( anchorElement );
+	div.appendChild( inputElement );
 
 	// Support tests won't run in some limited or non-browser environments
 	all = div.getElementsByTagName( "*" );
@@ -1508,7 +1519,13 @@ jQuery.support = ( function() {
 	jQuery( function() {
 		var container, marginDiv, tds,
 			divReset = "padding:0;margin:0;border:0;display:block;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;",
-			body = document.getElementsByTagName( "body" )[ 0 ];
+			body = document.getElementsByTagName( "body" )[ 0 ],
+			tableElement = document.createElement( "table" ),
+			tableRowElement = document.createElement( "tr" ),
+			tableCellElement = document.createElement( "td" ),
+			tableCellWithTextElement = document.createElement( "td" ),
+			divElement = document.createElement( "div" );
+		tableCellWithTextElement.textContent = "t";
 
 		if ( !body ) {
 
@@ -1528,7 +1545,11 @@ jQuery.support = ( function() {
 		// determining if an element has been hidden directly using
 		// display:none (it is still safe to use offsets if a parent element is
 		// hidden; don safety goggles and see bug #4512 for more information).
-		div.innerHTML = "<table><tr><td></td><td>t</td></tr></table>";
+		tableRowElement.appendChild( tableCellElement );
+		tableRowElement.appendChild( tableCellWithTextElement );
+		tableElement.appendChild( tableRowElement );
+		div.appendChild( tableElement );
+
 		tds = div.getElementsByTagName( "td" );
 		tds[ 0 ].style.cssText = "padding:0;margin:0;border:0;display:none";
 		isSupported = ( tds[ 0 ].offsetHeight === 0 );
@@ -1541,7 +1562,7 @@ jQuery.support = ( function() {
 		support.reliableHiddenOffsets = isSupported && ( tds[ 0 ].offsetHeight === 0 );
 
 		// Check box-sizing and margin behavior
-		div.innerHTML = "";
+		div.textContent = "";
 		div.style.cssText = "box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;padding:1px;border:1px;display:block;width:4px;margin-top:1%;position:absolute;top:1%;";
 		support.boxSizing = ( div.offsetWidth === 4 );
 		support.doesNotIncludeMarginInBodyOffset = ( body.offsetTop !== 1 );
@@ -1570,14 +1591,14 @@ jQuery.support = ( function() {
 			// Check if natively block-level elements act like inline-block
 			// elements when setting their display to 'inline' and giving
 			// them layout
-			div.innerHTML = "";
+			div.textContent = "";
 			div.style.cssText = divReset + "width:1px;padding:1px;display:inline;zoom:1";
 			support.inlineBlockNeedsLayout = ( div.offsetWidth === 3 );
 
 			// Support: IE6
 			// Check if elements with layout shrink-wrap their children
 			div.style.display = "block";
-			div.innerHTML = "<div></div>";
+			div.appendChild( divElement );
 			div.firstChild.style.width = "5px";
 			support.shrinkWrapBlocks = ( div.offsetWidth !== 3 );
 
@@ -4169,7 +4190,8 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	// Check if attributes should be retrieved by attribute nodes
 	support.attributes = assert( function( div ) {
-		div.innerHTML = "<select></select>";
+		var selectElement = document.createElement( "select" );
+		div.appendChild( selectElement );
 		var type = typeof div.lastChild.getAttribute( "multiple" );
 
 		// IE8 returns a string for some attributes even when not present
@@ -4178,9 +4200,15 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	// Check if getElementsByClassName can be trusted
 	support.getByClassName = assert( function( div ) {
+		var divWithTwoClasses = document.createElement( "div" ),
+			divWithHiddenClass = document.createElement( "div" );
 
+		divWithTwoClasses.classList.add( "hidden", "e" );
+		divWithHiddenClass.classList.add( "hidden" );
 		// Opera can't find a second classname (in 9.6)
-		div.innerHTML = "<div class='hidden e'></div><div class='hidden'></div>";
+		div.appendChild( divWithTwoClasses );
+		div.appendChild( divWithHiddenClass );
+
 		if ( !div.getElementsByClassName || !div.getElementsByClassName( "e" ).length ) {
 			return false;
 		}
@@ -4193,10 +4221,15 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// Check if getElementById returns elements by name
 	// Check if getElementsByName privileges form controls or returns elements by ID
 	support.getByName = assert( function( div ) {
+		var anchorElement = document.createElement( "a" ),
+			divElement = document.createElement( "div" );
 
+		anchorElement.name = expando;
+		divElement.setAttribute( "name", expando );
 		// Inject content
 		div.id = expando + 0;
-		div.innerHTML = "<a name='" + expando + "'></a><div name='" + expando + "'></div>";
+		div.appendChild( anchorElement );
+		div.appendChild( divElement );
 		docElem.insertBefore( div, docElem.firstChild );
 
 		// Test
@@ -4217,7 +4250,10 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	// IE6/7 return modified attributes
 	Expr.attrHandle = assert( function( div ) {
-		div.innerHTML = "<a href='#'></a>";
+		var anchorElement = document.createElement( "a" );
+		a.href = "#";
+		div.appendChild( anchorElement );
+
 		return div.firstChild && typeof div.firstChild.getAttribute !== strundefined &&
 			div.firstChild.getAttribute( "href" ) === "#";
 	} ) ?
@@ -4324,13 +4360,17 @@ setDocument = Sizzle.setDocument = function( node ) {
 		// Build QSA regex
 		// Regex strategy adopted from Diego Perini
 		assert( function( div ) {
+			var optionElement = document.createElement( "option" ),
+				selectElement = document.createElement( "select" );
+			optionElement.setAttribute( "selected", "" );
+			selectElement.appendChild( optionElement );
 
 			// Select is set to empty string on purpose
 			// This is to test IE's treatment of not explictly
 			// setting a boolean content attribute,
 			// since its presence should be enough
 			// http://bugs.jquery.com/ticket/12359
-			div.innerHTML = "<select><option selected=''></option></select>";
+			div.appendChild( selectElement );
 
 			// IE8 - Some boolean attributes are not treated correctly
 			if ( !div.querySelectorAll( "[selected]" ).length ) {
@@ -4346,10 +4386,13 @@ setDocument = Sizzle.setDocument = function( node ) {
 		} );
 
 		assert( function( div ) {
+			var inputElement = document.createElement( "input" );
+			inputElement.type = "hidden";
+			inputElement.setAttribute( "i", "" );
 
 			// Opera 10-12/IE8 - ^= $= *= and empty values
 			// Should not select anything
-			div.innerHTML = "<input type='hidden' i=''/>";
+			div.appendChild( inputElement );
 			if ( div.querySelectorAll( "[i^='']" ).length ) {
 				rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:\"\"|'')" );
 			}
