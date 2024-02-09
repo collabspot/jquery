@@ -12,7 +12,6 @@ yarn.lock
 
 npm-debug.log*
 
-/dist
 
 /external
 /node_modules

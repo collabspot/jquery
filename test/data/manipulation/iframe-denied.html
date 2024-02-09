@@ -13,10 +13,13 @@
 				div = document.createElement( "div" ),
 				src = "http://" + window.parent.externalHost,
 				success = true,
-				error = "";
+				error = "",
+				iframeElement = document.createElement("iframe");
+			iframeElement.name = "test";
+			iframeElement.src = "\"" + src + "\"";
 
 			script.parentNode.appendChild( div );
-			div.innerHTML = "<iframe name=\"test\" src=\"" + src + "\">";
+			div.appendChild( iframeElement );
 
 			jQuery(function() {
 				try {

@@ -11,8 +11,12 @@ define( [
 // Because of that, this security measure has to be disabled in Safari 8.
 // https://bugs.webkit.org/show_bug.cgi?id=137337
 support.createHTMLDocument = ( function() {
-	var body = document.implementation.createHTMLDocument( "" ).body;
-	body.innerHTML = "<form></form><form></form>";
+	var body = document.implementation.createHTMLDocument( "" ).body,
+		firstFormElement = document.createElement( "form" ),
+		secondFormElement = document.createElement( "form" );
+
+	body.appendChild( firstFormElement );
+	body.appendChild( secondFormElement );
 	return body.childNodes.length === 2;
 } )();
 
